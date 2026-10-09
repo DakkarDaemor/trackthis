@@ -1,4 +1,4 @@
-# TrackThis
+# schedine-tracker
 
 App locale per registrare schedine/punti giorno per giorno, con statistiche
 settimanali e mensili e import/export CSV compatibile Excel.
