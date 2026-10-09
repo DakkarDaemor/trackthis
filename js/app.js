@@ -199,6 +199,7 @@
 
   // ---------- rendering: stats ----------
   var statsMode = "week"; // or "month"
+  var pieMode = "count"; // or "points": peso delle fette nella torta categorie
 
   function periodBounds(mode, offset){
     // returns {key, label} for current period minus offset periods
@@ -316,24 +317,33 @@
     var periodNow = periodBounds(statsMode, 0);
     var scoped = entries.filter(function(e){ return keyFn(e.date) === periodNow; });
 
-    var counts = {};
+    // peso di una fetta: numero di schedine oppure somma dei loro punti
+    var weightOf = pieMode === "points"
+      ? function(e){ return e.points; }
+      : function(){ return 1; };
+    var stats = {};
     var order = [];
+    var total = 0;
     scoped.forEach(function(e){
       var cat = e.category || "Schedina";
-      if(!counts[cat]){ counts[cat] = 0; order.push(cat); }
-      counts[cat] += 1;
+      if(!stats[cat]){ stats[cat] = { count:0, points:0, weight:0 }; order.push(cat); }
+      var w = weightOf(e);
+      stats[cat].count += 1;
+      stats[cat].points += e.points;
+      stats[cat].weight += w;
+      total += w;
     });
-    var total = scoped.length;
     if(total === 0){
       svg.innerHTML = '<circle cx="60" cy="60" r="54" fill="none" stroke="#e3dcc6" stroke-width="12"></circle>';
       legend.innerHTML = '<div class="row"><span class="name">Nessun dato nel periodo</span></div>';
       return;
     }
-    order.sort(function(a,b){ return counts[b]-counts[a]; });
+    order = order.filter(function(cat){ return stats[cat].weight > 0; });
+    order.sort(function(a,b){ return stats[b].weight-stats[a].weight; });
     var cx=60, cy=60, r=54;
     var angle = 0; // 0 = ore 12, si procede in senso orario
     var slices = order.map(function(cat){
-      var frac = counts[cat]/total;
+      var frac = stats[cat].weight/total;
       var startAngle = angle;
       var endAngle = angle + frac*360;
       angle = endAngle;
@@ -350,10 +360,12 @@
     }).join("");
     svg.innerHTML = slices;
     legend.innerHTML = order.map(function(cat){
-      var pct = Math.round((counts[cat]/total)*100);
+      var s = stats[cat];
+      var pct = Math.round((s.weight/total)*100);
+      var detail = pieMode === "points" ? fmtPoints(s.points)+' pt' : s.count;
       return '<div class="row">'+
         '<span class="dot" style="background:'+categoryStyle(cat).bg+'"></span>'+
-        '<span class="name">'+escapeHtml(cat)+' ('+counts[cat]+')</span>'+
+        '<span class="name">'+escapeHtml(cat)+' ('+detail+')</span>'+
         '<span class="pct">'+pct+'%</span>'+
       '</div>';
     }).join("");
@@ -615,6 +627,18 @@
       document.getElementById("toggleMonth").classList.add("active");
       document.getElementById("toggleWeek").classList.remove("active");
       renderPeriodViews();
+    });
+    document.getElementById("pieByCount").addEventListener("click", function(){
+      pieMode = "count";
+      document.getElementById("pieByCount").classList.add("active");
+      document.getElementById("pieByPoints").classList.remove("active");
+      renderCategoryChart();
+    });
+    document.getElementById("pieByPoints").addEventListener("click", function(){
+      pieMode = "points";
+      document.getElementById("pieByPoints").classList.add("active");
+      document.getElementById("pieByCount").classList.remove("active");
+      renderCategoryChart();
     });
 
     document.getElementById("menuBtn").addEventListener("click", function(){

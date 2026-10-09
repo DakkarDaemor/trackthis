@@ -140,6 +140,9 @@ input:focus{outline:2px solid var(--gold-dim);outline-offset:1px;}
   padding:8px;border-radius:6px;font-size:12px;font-weight:700;letter-spacing:1px;
   text-transform:uppercase;cursor:pointer;}
 .toggle button.active{background:var(--gold);color:var(--felt-dark);}
+.toggle.onpaper{background:rgba(0,0,0,0.06);}
+.toggle.onpaper button{color:var(--ink-soft);padding:6px;font-size:11px;}
+.toggle.onpaper button.active{color:var(--felt-dark);}
 
 .chartwrap{background:var(--paper);border-radius:var(--radius);padding:14px 10px;color:var(--ink);margin-bottom:14px;}
 .chartwrap svg{width:100%;display:block;}
