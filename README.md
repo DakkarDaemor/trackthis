@@ -46,7 +46,7 @@ Modifica il file interessato (`index.html` per il markup, `css/style.css` per lo
 stile, `js/app.js` per la logica) e ricarica i file sul repo (o fai push). Se
 cambi qualsiasi file elencato in `ASSETS` dentro `sw.js` (incluso il contenuto di
 `index.html`, `css/style.css` o dei file in `js/`), aumenta il numero in
-`CACHE_NAME` dentro `sw.js` (es. da `schedine-cache-v3` a `v4`), altrimenti il
+`CACHE_NAME` dentro `sw.js` (es. da `schedine-tracker-cache-v3` a `v4`), altrimenti il
 service worker potrebbe continuare a servire la versione vecchia dalla cache.
 
 Lo stesso numero è mostrato nell'app (menu `⋮` in basso) come promemoria di quale
