@@ -1,7 +1,7 @@
 // Service worker: network-first per i file dell'app (così gli aggiornamenti
 // arrivano subito, al primo caricamento online), con fallback alla cache per
 // l'uso offline. CACHE_NAME va comunque aggiornato ad ogni release.
-var CACHE_NAME = "schedine-tracker-cache-v20";
+var CACHE_NAME = "schedine-tracker-cache-v21";
 var ASSETS = [
   "./",
   "./index.html",
@@ -17,7 +17,8 @@ var ASSETS = [
 self.addEventListener("install", function(event){
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache){
-      return cache.addAll(ASSETS);
+      // "reload": scavalca la cache HTTP (GitHub Pages manda max-age=600)
+      return cache.addAll(ASSETS.map(function(u){ return new Request(u, {cache:"reload"}); }));
     })
   );
   self.skipWaiting();
@@ -44,7 +45,9 @@ self.addEventListener("fetch", function(event){
   if(url.origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(req).then(function(response){
+    // "no-cache": rivalida sempre col server (304 se invariato), altrimenti la
+    // cache HTTP del browser servirebbe file vecchi per 10 minuti dopo un deploy
+    fetch(req, {cache:"no-cache"}).then(function(response){
       // aggiorna la cache con la copia fresca
       if(response && response.ok){
         var copy = response.clone();
